@@ -5,30 +5,54 @@ const kafka = new Kafka({
   brokers: ["localhost:9092"],
 });
 
-const consumer = kafka.consumer({
-  groupId: "analytic-service",
-});
+const consumer = kafka.consumer({ groupId: "analytic-service" });
 
-async function run() {
-  await consumer.connect();
+const run = async () => {
+  try {
+    await consumer.connect();
+    await consumer.subscribe({
+      topics: ["payment-successful", "order-successful", "email-successful"],
+      fromBeginning: true,
+    });
 
-  await consumer.subscribe({
-    topic: "payment-successful",
-    fromBeginning: true,
-  });
+    await consumer.run({
+      eachMessage: async ({ topic, partition, message }) => {
+        switch (topic) {
+          case "payment-successful":
+            {
+              const value = message.value.toString();
+              const { userId, cart } = JSON.parse(value);
 
-  await consumer.run({
-    eachMessage: async ({ topic, partition, message }) => {
-      const value = message.value?.toString();
-      if (!value) return;
+              const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2);
 
-      const { userId, cart } = JSON.parse(value);
+              console.log(`Analytic consumer: User ${userId} paid ${total}`);
+            }
+            break;
+          case "order-successful":
+            {
+              const value = message.value.toString();
+              const { userId, orderId } = JSON.parse(value);
 
-      const total = cart.reduce((acc, item) => acc + item.price * (item.quantity || 1), 0);
+              console.log(`Analytic consumer: Order id ${orderId} created for user id ${userId}`);
+            }
+            break;
+          case "email-successful":
+            {
+              const value = message.value.toString();
+              const { userId, emailId } = JSON.parse(value);
 
-      console.log(`📊 Analytics consumer: User ${userId} paid ${total}`);
-    },
-  });
-}
+              console.log(`Analytic consumer: Email id ${emailId} sent to user id ${userId}`);
+            }
+            break;
 
-run().catch(console.error);
+          default:
+            break;
+        }
+      },
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+run();

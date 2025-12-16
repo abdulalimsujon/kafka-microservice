@@ -25,11 +25,11 @@ async function run() {
 
       const { userId, cart } = JSON.parse(value);
 
-      const dummyOrderId = "1234";
-
+      const orderId = "1234";
+      console.log(`Order consumer: Order created for the user ${userId}`);
       await producer.send({
         topic: "order-successful",
-        messages: [{ value: JSON.stringify({ userId, cart, dummyOrderId }) }],
+        messages: [{ value: JSON.stringify({ userId, cart, orderId }) }],
       });
 
       console.log(`📊 Analytics consumer: User ${userId} paid ${total}`);

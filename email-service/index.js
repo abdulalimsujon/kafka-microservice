@@ -7,7 +7,7 @@ const kafka = new Kafka({
 
 const producer = kafka.producer();
 const consumer = kafka.consumer({
-  groupId: "order-service",
+  groupId: "email-service",
 });
 
 async function run() {
@@ -25,11 +25,12 @@ async function run() {
 
       const { userId, cart } = JSON.parse(value);
 
-      const dummyEmailId = "1234";
+      const dummyEmailId = "12345678";
+      console.log(`Email consumer: Email sent to the user ${userId}`);
 
       await producer.send({
-        topic: "order-successful",
-        messages: [{ value: JSON.stringify({ userId, cart, dummyOrderId }) }],
+        topic: "email-successful",
+        messages: [{ value: JSON.stringify({ userId, cart, dummyEmailId }) }],
       });
 
       console.log(`📊 Analytics consumer: User ${userId} paid ${total}`);
