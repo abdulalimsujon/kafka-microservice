@@ -19,10 +19,14 @@ async function run() {
 
   await consumer.run({
     eachMessage: async ({ topic, partition, message }) => {
-      console.log({
-        topic,
-        value: message.value.toString(),
-      });
+      const value = message.value?.toString();
+      if (!value) return;
+
+      const { userId, cart } = JSON.parse(value);
+
+      const total = cart.reduce((acc, item) => acc + item.price * (item.quantity || 1), 0);
+
+      console.log(`📊 Analytics consumer: User ${userId} paid ${total}`);
     },
   });
 }

@@ -1,7 +1,7 @@
 import { Kafka } from "kafkajs";
 
 const kafka = new Kafka({
-  clientId: "order-service",
+  clientId: "email-service",
   brokers: ["localhost:9092"],
 });
 
@@ -14,7 +14,7 @@ async function run() {
   await producer.connect();
   await consumer.connect();
   await consumer.subscribe({
-    topic: "payment-successful",
+    topic: "email-successful",
     fromBeginning: true,
   });
 
@@ -25,7 +25,7 @@ async function run() {
 
       const { userId, cart } = JSON.parse(value);
 
-      const dummyOrderId = "1234";
+      const dummyEmailId = "1234";
 
       await producer.send({
         topic: "order-successful",

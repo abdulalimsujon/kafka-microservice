@@ -4,7 +4,7 @@ import { Kafka } from "kafkajs";
 
 const kafka = new Kafka({
   clientId: "payment-service",
-  brokers: ["localhost:9092"], // must match exposed Docker port
+  brokers: ["localhost:9092"],
 });
 
 const producer = kafka.producer();
@@ -31,12 +31,12 @@ app.post("/payment-service", async (req, res) => {
   //kafka
 
   await producer.send({
-    topic: "payment-success",
+    topic: "payment-successful",
     messages: [{ value: JSON.stringify({ userId, cart }) }],
   });
 
   await producer.send({
-    topic: "payment-topic",
+    topic: "payment-successful",
     messages: [{ value: JSON.stringify({ userId, cart }) }],
   });
 
